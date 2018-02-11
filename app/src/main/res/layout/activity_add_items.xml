@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/dp16"
+    android:paddingRight="@dimen/dp16"
+    android:paddingTop="@dimen/dp16"
+    >
+
+    <EditText
+        android:id="@+id/input_item_name"
+        android:layout_width="wrap_content"
+        android:minWidth="@dimen/dp16"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:inputType="text"
+        android:hint="@string/item_name"
+        />
+
+
+    <EditText
+        android:id="@+id/input_item_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:hint="@string/item_details"
+        android:inputType="textMultiLine"
+            />
+
+
+        <AutoCompleteTextView
+            android:id="@+id/input_auto_complete_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="15"
+            android:hint="@string/item_location"
+            />
+
+
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp16"
+        android:layout_gravity="center"
+        android:text="@string/save" />
+
+    </LinearLayout>

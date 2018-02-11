@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">ShareNEarn</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="item_name">Name of item</string>
+    <string name="item_location">Enter Location</string>
+    <string name="item_details">Item details</string>
+    <string name="save">Save</string>
+</resources>
