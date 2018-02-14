@@ -17,6 +17,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -28,9 +29,12 @@ public class PlaceArrayAdapter extends ArrayAdapter<PlaceArrayAdapter.PlaceAutoc
 
     private static final String TAG = "PlaceArrayAdapter";
     private GoogleApiClient mGoogleApiClient;
+    private PlaceDetectionClient mPlaceDetectionClient;
     private AutocompleteFilter mPlaceFilter;
     private LatLngBounds mBounds;
     private ArrayList<PlaceAutocomplete> mResultList;
+    private static final int M_MAX_ENTRIES = 5;
+
 
 
     public PlaceArrayAdapter(Context context, int resource, LatLngBounds bounds,
@@ -62,6 +66,7 @@ public class PlaceArrayAdapter extends ArrayAdapter<PlaceArrayAdapter.PlaceAutoc
     @Override
     public Filter getFilter() {
         Filter filter = new Filter() {
+
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
 
@@ -78,6 +83,8 @@ public class PlaceArrayAdapter extends ArrayAdapter<PlaceArrayAdapter.PlaceAutoc
                 return results;
             }
 
+
+
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0) {
@@ -91,7 +98,6 @@ public class PlaceArrayAdapter extends ArrayAdapter<PlaceArrayAdapter.PlaceAutoc
         };
         return filter;
     }
-
 
     private ArrayList<PlaceAutocomplete> getPredictions(CharSequence constraint) {
 
