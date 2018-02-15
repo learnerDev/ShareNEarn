@@ -115,7 +115,7 @@ public class PlaceArrayAdapter extends ArrayAdapter<PlaceArrayAdapter.PlaceAutoc
 
             final Status status = autocompletePredictions.getStatus();
             if (!status.isSuccess()) {
-                Toast.makeText(getContext(), "Error: " + status.toString(),
+                Toast.makeText(getContext(), "Error:4 " + status.toString(),
                         Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Error getting place predictions: " + status
                         .toString());

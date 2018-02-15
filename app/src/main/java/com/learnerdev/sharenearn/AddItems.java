@@ -59,28 +59,23 @@ import static com.learnerdev.sharenearn.Defaults.GEO_POINTS_CATEGORY_NAME;
 
 public class AddItems extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
-        GoogleApiClient.ConnectionCallbacks, LocationListener {
+        GoogleApiClient.ConnectionCallbacks {
     private static final int M_MAX_ENTRIES = 5;
     static String TAG = "AddItemsActivity";
     private static final int GOOGLE_API_CLIENT_ID = 0;
     private Button saveButton;
     private EditText itemName;
-    //    private AutoCompleteTextView itemLocation;
     private EditText itemDetails;
     private GeoPoint itemLocation;
     private AutoCompleteTextView itemAutoCompleteLocation;
     private TextView tvStatus;//TODO this text view is only for debug purposes
-    //    private String locationTextBuffer;
     private GoogleApiClient mGoogleApiClient;
-    private GoogleApiClient lGoogleApiClient;
     PlaceDetectionClient mPlaceDetectionClient;
 
 
     private PlaceArrayAdapter mPlaceArrayAdapter;
-    Location mLastLocation;
-    LocationRequest mLocationRequest;
+//    Location mLastLocation;
     private ImageButton getCurrentLocationBtn;
-    private ArrayAdapter<String> adapter;
     private Place[] places;
     private String[] placeNames;
 
@@ -95,7 +90,6 @@ public class AddItems extends AppCompatActivity implements
 
     private void initUI() {
         itemName = findViewById(R.id.input_item_name);
-//        itemLocation=(AutoCompleteTextView) findViewById(R.id.input_item_location);
         itemDetails = findViewById(R.id.input_item_details);
         saveButton = findViewById(R.id.save_button);
         itemAutoCompleteLocation = findViewById(R.id.input_auto_complete_location);
@@ -113,13 +107,6 @@ public class AddItems extends AppCompatActivity implements
                 .addConnectionCallbacks(this)
                 .build();
 
-        //To check connectivity
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        } else {
-            Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show();
-            Log.i(TAG,"Device not connected");
-        }
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,105 +126,6 @@ public class AddItems extends AppCompatActivity implements
         itemAutoCompleteLocation.setAdapter(mPlaceArrayAdapter);
     }
 
-    //TODO 1. Rearrange( Related to getting current place, taken from internet, understand and re-arrange the code)
-    public void settingRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);    // 10 seconds, in milliseconds
-        mLocationRequest.setFastestInterval(1000);   // 1 second, in milliseconds
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-
-        //SettingsApi deprecated, find alternative or possible work-around
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
-                        builder.build());
-
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-
-            @Override
-            public void onResult(@NonNull LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                final LocationSettingsStates state = result.getLocationSettingsStates();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can
-                        // initialize location requests here.
-                        getLocation();
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied, but this can be fixed
-                        // by showing the user a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(AddItems.this, 1000);
-
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way
-                        // to fix the settings so we won't show the dialog.
-                        break;
-                }
-            }
-
-        });
-    }
-
-    //TODO 2. Rearrange( Related to getting current place, taken from internet, understand and re-arrange the code)
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
-        switch (requestCode) {
-            case 1000:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        // All required changes were successfully made
-                        getLocation();
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
-                        Toast.makeText(this, "Location Service not Enabled", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-        }
-    }
-    //TODO 3. Rearrange( Related to getting current place, taken from internet, understand and re-arrange the code)
-    public void getLocation() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(AddItems.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    1000);
-            ActivityCompat.requestPermissions(AddItems.this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                    1000);
-            return;
-        } else {
-            /*Getting the location after acquiring location service*/
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
-            if (mLastLocation != null) {
-                tvStatus.setText("Latitude: " + String.valueOf(mLastLocation.getLatitude()));
-                tvStatus.append("\nLongitude: " + String.valueOf(mLastLocation.getLongitude()));
-            } else {
-                /*if there is no last known location. Which means the device has no data for the location currently.
-                * So we will get the current location.
-                * For this we'll implement Location Listener and override onLocationChanged*/
-                Log.i("Current Location", "No data for location found");
-                if (!mGoogleApiClient.isConnected())
-                    mGoogleApiClient.connect();
-                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, AddItems.this);
-            }
-        }
-    }
 
     //is called when the save button is clicked
     /*TODO
@@ -248,7 +136,11 @@ public class AddItems extends AppCompatActivity implements
         final Item[] item = new Item[1];
         String tempItemName = itemName.getText().toString();
         String tempItemDetails = itemDetails.getText().toString();
-        itemLocation.addCategory(GEO_POINTS_CATEGORY_NAME);//TODO convert this string to constant later, it defines the name of the table in backendless
+        if(itemLocation!=null){
+            itemLocation.addCategory(GEO_POINTS_CATEGORY_NAME);
+        }else{
+            Log.e(TAG,"Location is empty");
+        }
 
         if (!tempItemName.isEmpty() && !tempItemDetails.isEmpty()) {
 
@@ -276,13 +168,13 @@ public class AddItems extends AppCompatActivity implements
                                 }
                                 @Override
                                 public void handleFault(BackendlessFault fault) {
-                                    Toast.makeText(getApplicationContext(), "Error:" + fault.getCode() + fault.getMessage(),
+                                    Toast.makeText(getApplicationContext(), "Error:1" + fault.getCode() + fault.getMessage(),
                                             Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
                         public void handleFault(BackendlessFault fault) {
-                            Toast.makeText(getApplicationContext(), "Error:" + fault.getCode() + fault.getMessage(),
+                            Toast.makeText(getApplicationContext(), "Error:2" + fault.getCode() + fault.getMessage(),
                                     Toast.LENGTH_LONG).show();
                         }
                     });
@@ -290,7 +182,7 @@ public class AddItems extends AppCompatActivity implements
 
                 @Override
                 public void handleFault(BackendlessFault fault) {
-                    Toast.makeText(getApplicationContext(), "Error:" + fault.getCode() + fault.getMessage(),
+                    Toast.makeText(getApplicationContext(), "Error:3" + fault.getCode() + fault.getMessage(),
                             Toast.LENGTH_LONG).show();
                 }
             });
@@ -337,7 +229,7 @@ public class AddItems extends AppCompatActivity implements
         mPlaceArrayAdapter.setGoogleApiClient(mGoogleApiClient);
         Log.i(TAG, "Google Places API connected.");
         //TODO here we are calling the start of current place search, somethings needs to be done/
-        settingRequest();
+//        settingRequest();
     }
 
     @Override
@@ -357,6 +249,11 @@ public class AddItems extends AppCompatActivity implements
     }
 
     //TODO 4. Rearrange( Related to getting current place, taken from internet, understand and re-arrange the code)
+    /*
+    *TODO: This function implement current likely places finding,
+    * Implement error and other exception handling, currently only the success scenario is handled
+    * 
+     */
     public void getCurrentPlace() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(AddItems.this,
@@ -392,8 +289,6 @@ public class AddItems extends AppCompatActivity implements
                             break;
                         }
                     }
-                    adapter = new ArrayAdapter<>(AddItems.this,
-                            android.R.layout.simple_list_item_1, android.R.id.text1, placeNames);
                         placeSelectDialogBox(likelyPlaces);
                 }
             }
@@ -414,13 +309,6 @@ public class AddItems extends AppCompatActivity implements
         });
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
-        tvStatus.setText("Latitude: " + String.valueOf(mLastLocation.getLatitude()));
-        tvStatus.append("Longitude: " + String.valueOf(mLastLocation.getLongitude()));
     }
 
 }
