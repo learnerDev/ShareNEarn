@@ -10,4 +10,6 @@
     <string name="item_location">Enter Location</string>
     <string name="item_details">Item details</string>
     <string name="save">Save</string>
+    <string name="search">Search</string>
+
 </resources>
