@@ -54,6 +54,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 
+import static com.learnerdev.sharenearn.Defaults.COLUMN_NAME_ITEM_LOCATION;
 import static com.learnerdev.sharenearn.Defaults.EARTH;
 import static com.learnerdev.sharenearn.Defaults.GEO_POINTS_CATEGORY_NAME;
 
@@ -160,7 +161,7 @@ public class AddItems extends AppCompatActivity implements
                             item[0] = response;
                             ArrayList<GeoPoint> location = new ArrayList<GeoPoint>();
                             location.add(itemLocation);
-                            Backendless.Persistence.of(Item.class).setRelation(item[0], "location:GeoPoint:1", location, new AsyncCallback<Integer>() {
+                            Backendless.Persistence.of(Item.class).setRelation(item[0], COLUMN_NAME_ITEM_LOCATION+":GeoPoint:1", location, new AsyncCallback<Integer>() {
                                 @Override
                                 public void handleResponse(Integer response) {
                                     Toast.makeText(getApplicationContext(), "Successfully related",
