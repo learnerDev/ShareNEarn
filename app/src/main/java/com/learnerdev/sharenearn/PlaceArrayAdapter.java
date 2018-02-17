@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PlaceArrayAdapter extends ArrayAdapter<PlaceArrayAdapter.PlaceAutocomplete> implements Filterable {
 
-    private static final String TAG = "PlaceArrayAdapter";
+    private static final String TAG = "SNE-PlaceArrayAdapter";
     private GoogleApiClient mGoogleApiClient;
     private PlaceDetectionClient mPlaceDetectionClient;
     private AutocompleteFilter mPlaceFilter;

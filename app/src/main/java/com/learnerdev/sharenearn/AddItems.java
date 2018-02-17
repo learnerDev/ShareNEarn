@@ -61,7 +61,7 @@ public class AddItems extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks {
     private static final int M_MAX_ENTRIES = 5;
-    static String TAG = "AddItemsActivity";
+    static String TAG = "SNE-AddItems";
     private static final int GOOGLE_API_CLIENT_ID = 0;
     private Button saveButton;
     private EditText itemName;
