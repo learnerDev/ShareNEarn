@@ -1,19 +1,27 @@
 package com.learnerdev.sharenearn;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.geo.GeoPoint;
+import com.backendless.persistence.DataQueryBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -22,8 +30,15 @@ import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import static com.learnerdev.sharenearn.Defaults.COLUMN_NAME_ITEM_LOCATION;
 
 public class SearchItems extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -34,10 +49,15 @@ public class SearchItems extends AppCompatActivity implements
     private EditText itemName;
     private EditText itemDetails;
     private AutoCompleteTextView itemAutoCompleteLocation;
-    private ImageButton currentLocationBtn;
+    private ImageButton getCurrentLocationBtn;
     private Button searchButton;
     private TextView tvStatus;
     private static final int GOOGLE_API_CLIENT_ID = 0;
+    private GeoPoint selectedLocation;
+    private LatLng selectedLocLatLng;
+    private String whereClause;
+
+    private ArrayList<Item> foundItems;
 
 
     private GoogleApiClient mGoogleApiClient;
@@ -58,11 +78,12 @@ public class SearchItems extends AppCompatActivity implements
         itemName=findViewById(R.id.s_input_item_name);
         itemDetails=findViewById(R.id.s_input_item_details);
         itemAutoCompleteLocation=findViewById(R.id.s_input_auto_complete_location);
-        currentLocationBtn=findViewById(R.id.s_btn_current_location);
+        getCurrentLocationBtn=findViewById(R.id.s_btn_current_location);
         searchButton= findViewById(R.id.s_search_button);
         tvStatus=findViewById(R.id.s_tv_status);
 
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+        foundItems=new ArrayList();
 
         //To get the necessary google api client for location auto complete and for likely places
         mGoogleApiClient = new GoogleApiClient.Builder(SearchItems.this)
@@ -73,10 +94,64 @@ public class SearchItems extends AppCompatActivity implements
                 .addConnectionCallbacks(this)
                 .build();
 
+        getCurrentLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCurrentPlace();
+            }
+        });
 
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                TODO: this is just calling getNearByItems which searches only based on location
+                getNearByItems();
+
+            }
+        });
     }
 
+    /*
+    * This method will get the data
+     */
     public void getNearByItems(){
+        int radius=3;
+//        whereClause = "distance( "+selectedLocLatLng.latitude+", "+
+//                selectedLocLatLng.longitude+", "+
+//                COLUMN_NAME_ITEM_LOCATION+".latitude, "+
+//                COLUMN_NAME_ITEM_LOCATION+".longitude ) < mi(3)";
+        whereClause=String.format(Locale.getDefault(),"distance(%s, %s, %s.latitude, %s.longitude)<mi(%d)",
+                selectedLocLatLng.latitude,
+                selectedLocLatLng.longitude,
+                COLUMN_NAME_ITEM_LOCATION,
+                COLUMN_NAME_ITEM_LOCATION,
+                radius);
+        Log.i(TAG,"Where Clause: "+whereClause);
+        DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+        queryBuilder.setWhereClause( whereClause ).setRelationsDepth( 1 );
+        Backendless.Data.of( Item.class ).find(queryBuilder, new AsyncCallback<List<Item>>() {
+            @Override
+            public void handleResponse(List<Item> response) {
+                //TODO debug message
+                tvStatus.setText("Started searching");
+//                foundItems= (ArrayList) response;
+                for( Item item : response)
+                {
+                    Log.i(TAG,"Entered for loop");
+                    tvStatus.append(item.getItemName()+"\n");
+                    Log.i(TAG,item.getItemName());
+                }
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                Log.e(TAG,"Error: "+fault.getCode()+fault.getMessage());
+            }
+        });
+
+//        String format = "%s lives at %f, %f tagged as '%s'";
+
+
 
     }
 
@@ -119,10 +194,26 @@ public class SearchItems extends AppCompatActivity implements
                             break;
                         }
                     }
-//                    placeSelectDialogBox(likelyPlaces);
+                    placeSelectDialogBox(likelyPlaces);
                 }
             }
         });
+    }
+
+    private void placeSelectDialogBox(final PlaceLikelihoodBufferResponse placeLikelihoodBufferResponse){
+        AlertDialog.Builder builder = new AlertDialog.Builder(SearchItems.this);
+        builder.setTitle(R.string.app_name)
+                .setItems(placeNames, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedLocLatLng = places[which].getLatLng();
+//                        selectedLocation = new GeoPoint(latLng.latitude, latLng.longitude);
+                        itemAutoCompleteLocation.setText(places[which].getName());
+                        placeLikelihoodBufferResponse.release();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 
