@@ -1,9 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.learnerdev.sharenearn.SearchItems">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/dp16"
+    android:paddingRight="@dimen/dp16"
+    android:paddingTop="@dimen/dp16"
+    >
 
-</android.support.constraint.ConstraintLayout>
+    <EditText
+        android:id="@+id/s_input_item_name"
+        android:layout_width="wrap_content"
+        android:minWidth="@dimen/dp16"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:inputType="text"
+        android:hint="@string/item_name"
+        />
+
+
+    <EditText
+        android:id="@+id/s_input_item_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:hint="@string/item_details"
+        android:inputType="textMultiLine"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp40"
+        android:background="@color/common_google_signin_btn_text_dark_pressed"
+        android:layout_margin="@dimen/dp8"
+        android:translationZ="@dimen/dp4"
+
+
+        >
+
+        <AutoCompleteTextView
+            android:id="@+id/s_input_auto_complete_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="12"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="@dimen/dp4"
+            android:paddingTop="@dimen/dp4"
+            android:background="@null"
+            android:hint="@string/item_location"
+            />
+
+        <ImageButton
+            android:id="@+id/s_btn_current_location"
+            android:layout_width="@dimen/dp40"
+            android:layout_height="@dimen/dp40"
+            android:src="@drawable/ic_gps_fixed_black"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:paddingBottom="@dimen/dp4"
+            android:clickable="true"
+            />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/powered_by_google_light"
+        android:layout_gravity="right"
+        android:layout_marginRight="@dimen/dp16"
+        />
+
+    <Button
+        android:id="@+id/s_search_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp16"
+        android:layout_gravity="center"
+        android:text="@string/search" />
+
+    <TextView
+        android:id="@+id/s_tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/dp40"
+        android:layout_margin="@dimen/dp16"
+
+        />
+
+</LinearLayout>
