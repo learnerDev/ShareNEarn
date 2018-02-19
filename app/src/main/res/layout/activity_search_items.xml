@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:paddingLeft="@dimen/dp16"
     android:paddingRight="@dimen/dp16"
     android:paddingTop="@dimen/dp16"
-    >
+    tools:context="com.learnerdev.sharenearn.SearchItems">
+
+>
 
     <EditText
         android:id="@+id/s_input_item_name"
@@ -87,6 +90,14 @@
         android:minHeight="@dimen/dp40"
         android:layout_margin="@dimen/dp16"
 
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/s_item_recycler"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp192"
+        android:translationZ="@dimen/dp4"
         />
 
 </LinearLayout>

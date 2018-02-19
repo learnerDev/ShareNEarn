@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:focusable="true"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:clickable="true"
+    android:orientation="vertical"
+    android:elevation="@dimen/dp4"
+    android:layout_margin="0.5dp"
+    >
+    <TextView
+        android:id="@+id/tv_row_item_id"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="@dimen/dp12"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_row_item_name"
+        android:textColor="@color/colorPrimary"
+        android:layout_below="@id/tv_row_item_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tv_row_item_details"
+        android:textColor="@color/colorPrimary"
+        android:layout_toRightOf="@id/tv_row_item_name"
+        android:layout_below="@id/tv_row_item_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_row_item_location"
+        android:layout_width="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/tv_row_item_id"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

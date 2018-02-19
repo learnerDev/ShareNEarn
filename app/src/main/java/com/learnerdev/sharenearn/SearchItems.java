@@ -9,6 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -67,6 +70,10 @@ public class SearchItems extends AppCompatActivity implements
     private String[] placeNames;
     private PlaceArrayAdapter mPlaceArrayAdapter;
 
+    private RecyclerView itemsRecycler;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +90,15 @@ public class SearchItems extends AppCompatActivity implements
         tvStatus=findViewById(R.id.s_tv_status);
 
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
-        foundItems=new ArrayList();
+        foundItems= new ArrayList<>();
+
+        itemsRecycler=findViewById(R.id.s_item_recycler);
+
+        mAdapter=new ItemsListAdapter(foundItems);
+        mLayoutManager=new LinearLayoutManager(getApplicationContext());
+        itemsRecycler.setLayoutManager(mLayoutManager);
+        itemsRecycler.setItemAnimator(new DefaultItemAnimator());
+        itemsRecycler.setAdapter(mAdapter);
 
         //To get the necessary google api client for location auto complete and for likely places
         mGoogleApiClient = new GoogleApiClient.Builder(SearchItems.this)
@@ -129,18 +144,21 @@ public class SearchItems extends AppCompatActivity implements
         Log.i(TAG,"Where Clause: "+whereClause);
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
         queryBuilder.setWhereClause( whereClause ).setRelationsDepth( 1 );
+        queryBuilder.setRelated(COLUMN_NAME_ITEM_LOCATION);
         Backendless.Data.of( Item.class ).find(queryBuilder, new AsyncCallback<List<Item>>() {
             @Override
             public void handleResponse(List<Item> response) {
                 //TODO debug message
                 tvStatus.setText("Started searching");
+
 //                foundItems= (ArrayList) response;
                 for( Item item : response)
-                {
-                    Log.i(TAG,"Entered for loop");
-                    tvStatus.append(item.getItemName()+"\n");
+                {   foundItems.add(item);
+//                    Log.i(TAG,"Entered for loop");
+//                    tvStatus.append(item.getItemName()+"\n");
                     Log.i(TAG,item.getItemName());
                 }
+                mAdapter.notifyDataSetChanged();
             }
 
             @Override
