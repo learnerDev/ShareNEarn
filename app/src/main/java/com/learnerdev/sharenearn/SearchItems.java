@@ -2,6 +2,7 @@ package com.learnerdev.sharenearn;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -136,6 +137,10 @@ public class SearchItems extends AppCompatActivity implements
                 Log.d(TAG, "onItemClick id: " + id);
                 selectedItem=foundItems.get(position);
                 tvStatus.setText("Selected item's id: "+selectedItem.getObjectId());
+                Intent intent=new Intent(getApplicationContext(), ViewItem.class);
+                intent.putExtra("EXTRA_OBJECT_ID",selectedItem.getObjectId());
+                startActivity(intent);
+
             }
         });
 
