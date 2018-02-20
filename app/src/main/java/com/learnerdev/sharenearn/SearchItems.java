@@ -37,6 +37,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,6 +61,7 @@ public class SearchItems extends AppCompatActivity implements
     private GeoPoint selectedLocation;
     private LatLng selectedLocLatLng;
     private String whereClause;
+    private Item selectedItem;
 
     private ArrayList<Item> foundItems;
 
@@ -68,11 +71,11 @@ public class SearchItems extends AppCompatActivity implements
 
     private Place[] places;
     private String[] placeNames;
-    private PlaceArrayAdapter mPlaceArrayAdapter;
 
     private RecyclerView itemsRecycler;
-    private RecyclerView.Adapter mAdapter;
+    private ItemsListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+//    private ItemsListAdapter itemsListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +127,18 @@ public class SearchItems extends AppCompatActivity implements
 
             }
         });
+
+        mAdapter.setOnItemClickListener(new ItemsListAdapter.ClickListener() {
+            @Override
+            public void onItemClick(int position, View v) {
+                Log.d(TAG, "onItemClick position: " + position);
+                int id=v.getId();
+                Log.d(TAG, "onItemClick id: " + id);
+                selectedItem=foundItems.get(position);
+                tvStatus.setText("Selected item's id: "+selectedItem.getObjectId());
+            }
+        });
+
     }
 
     /*
