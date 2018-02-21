@@ -29,7 +29,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".AddItems" />
-        <activity android:name=".SearchItems"></activity>
+        <activity android:name=".SearchItems" />
+        <activity android:name=".ViewItem"></activity>
     </application>
 
 </manifest>

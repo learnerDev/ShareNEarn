@@ -2,6 +2,7 @@ package com.learnerdev.sharenearn;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -59,6 +60,7 @@ public class SearchItems extends AppCompatActivity implements
     private GeoPoint selectedLocation;
     private LatLng selectedLocLatLng;
     private String whereClause;
+    private Item selectedItem;
 
     private ArrayList<Item> foundItems;
 
@@ -68,11 +70,11 @@ public class SearchItems extends AppCompatActivity implements
 
     private Place[] places;
     private String[] placeNames;
-    private PlaceArrayAdapter mPlaceArrayAdapter;
 
     private RecyclerView itemsRecycler;
-    private RecyclerView.Adapter mAdapter;
+    private ItemsListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+//    private ItemsListAdapter itemsListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +126,22 @@ public class SearchItems extends AppCompatActivity implements
 
             }
         });
+
+        mAdapter.setOnItemClickListener(new ItemsListAdapter.ClickListener() {
+            @Override
+            public void onItemClick(int position, View v) {
+                Log.d(TAG, "onItemClick position: " + position);
+                int id=v.getId();
+                Log.d(TAG, "onItemClick id: " + id);
+                selectedItem=foundItems.get(position);
+                tvStatus.setText("Selected item's id: "+selectedItem.getObjectId());
+                Intent intent=new Intent(getApplicationContext(), ViewItem.class);
+                intent.putExtra("EXTRA_OBJECT_ID",selectedItem.getObjectId());
+                startActivity(intent);
+
+            }
+        });
+
     }
 
     /*
