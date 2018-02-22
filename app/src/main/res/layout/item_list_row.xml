@@ -15,7 +15,6 @@
     >
     <TextView
         android:id="@+id/tv_row_item_id"
-        android:textColor="@color/colorPrimaryDark"
         android:textSize="@dimen/dp12"
         android:textStyle="bold"
         android:layout_alignParentTop="true"
@@ -23,14 +22,12 @@
         android:layout_height="wrap_content" />
     <TextView
         android:id="@+id/tv_row_item_name"
-        android:textColor="@color/colorPrimary"
         android:layout_below="@id/tv_row_item_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/tv_row_item_details"
-        android:textColor="@color/colorPrimary"
         android:layout_toRightOf="@id/tv_row_item_name"
         android:layout_below="@id/tv_row_item_id"
         android:layout_width="wrap_content"
