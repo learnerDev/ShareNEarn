@@ -215,8 +215,6 @@ public class AddItems extends AppCompatActivity implements
     public void onConnected(@Nullable Bundle bundle) {
         mPlaceArrayAdapter.setGoogleApiClient(mGoogleApiClient);
         Log.i(TAG, "Google Places API connected.");
-        //TODO here we are calling the start of current place search, somethings needs to be done/
-//        settingRequest();
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,11 +16,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
@@ -28,8 +31,11 @@ import com.backendless.geo.GeoPoint;
 import com.backendless.persistence.DataQueryBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
@@ -45,6 +51,8 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.learnerdev.sharenearn.Defaults.COLUMN_NAME_ITEM_LOCATION;
+import static com.learnerdev.sharenearn.Defaults.COLUMN_NAME_ITEM_NAME;
+import static com.learnerdev.sharenearn.Defaults.EARTH;
 
 public class SearchItems extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -53,7 +61,6 @@ public class SearchItems extends AppCompatActivity implements
     private static final int M_MAX_ENTRIES = 5;
 
     private EditText itemName;
-    private EditText itemDetails;
     private AutoCompleteTextView itemAutoCompleteLocation;
     private ImageButton getCurrentLocationBtn;
     private Button searchButton;
@@ -77,6 +84,8 @@ public class SearchItems extends AppCompatActivity implements
     private ItemsListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 //    private ItemsListAdapter itemsListAdapter;
+    private PlaceArrayAdapter mPlaceArrayAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +96,6 @@ public class SearchItems extends AppCompatActivity implements
 
     private void initUI() {
         itemName=findViewById(R.id.s_input_item_name);
-        itemDetails=findViewById(R.id.s_input_item_details);
         itemAutoCompleteLocation=findViewById(R.id.s_input_auto_complete_location);
         getCurrentLocationBtn=findViewById(R.id.s_btn_current_location);
         searchButton= findViewById(R.id.s_search_button);
@@ -97,6 +105,7 @@ public class SearchItems extends AppCompatActivity implements
         foundItems= new ArrayList<>();
 
         itemsRecycler=findViewById(R.id.s_item_recycler);
+        selectedLocLatLng=null;
 
         mAdapter=new ItemsListAdapter(foundItems);
         mLayoutManager=new LinearLayoutManager(getApplicationContext());
@@ -123,11 +132,15 @@ public class SearchItems extends AppCompatActivity implements
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                TODO: this is just calling getNearByItems which searches only based on location
-                getNearByItems();
+//                TODO: this is just calling getNearByItems which searches only based on current location
+                getItemsByLocation();
 
             }
         });
+
+        itemAutoCompleteLocation.setOnItemClickListener(itemAutoCompleteClickListener);
+        mPlaceArrayAdapter = new PlaceArrayAdapter(this, android.R.layout.simple_list_item_1, EARTH, null);
+        itemAutoCompleteLocation.setAdapter(mPlaceArrayAdapter);
 
         mAdapter.setOnItemClickListener(new ItemsListAdapter.ClickListener() {
             @Override
@@ -149,49 +162,85 @@ public class SearchItems extends AppCompatActivity implements
     /*
     * This method will get the data
      */
-    public void getNearByItems(){
-        int radius=3;
+    public void getItemsByLocation(){
+        int searchRadius=3;
 //        whereClause = "distance( "+selectedLocLatLng.latitude+", "+
 //                selectedLocLatLng.longitude+", "+
 //                COLUMN_NAME_ITEM_LOCATION+".latitude, "+
 //                COLUMN_NAME_ITEM_LOCATION+".longitude ) < mi(3)";
-        whereClause=String.format(Locale.getDefault(),"distance(%s, %s, %s.latitude, %s.longitude)<mi(%d)",
-                selectedLocLatLng.latitude,
-                selectedLocLatLng.longitude,
-                COLUMN_NAME_ITEM_LOCATION,
-                COLUMN_NAME_ITEM_LOCATION,
-                radius);
-        Log.i(TAG,"Where Clause: "+whereClause);
-        DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-        queryBuilder.setWhereClause( whereClause ).setRelationsDepth( 1 );
-        queryBuilder.setRelated(COLUMN_NAME_ITEM_LOCATION);
-        Backendless.Data.of( Item.class ).find(queryBuilder, new AsyncCallback<List<Item>>() {
-            @Override
-            public void handleResponse(List<Item> response) {
-                //TODO debug message
-                tvStatus.setText("Started searching");
+        if(selectedLocLatLng != null) {
+            whereClause = String.format(Locale.getDefault(), "distance(%s, %s, %s.latitude, %s.longitude)<mi(%d) and %s LIKE '%%%s%%'",
+                    selectedLocLatLng.latitude,
+                    selectedLocLatLng.longitude,
+                    COLUMN_NAME_ITEM_LOCATION,
+                    COLUMN_NAME_ITEM_LOCATION,
+                    searchRadius,
+                    COLUMN_NAME_ITEM_NAME,
+                    itemName.getText());
 
-//                foundItems= (ArrayList) response;
-                for( Item item : response)
-                {   foundItems.add(item);
-//                    Log.i(TAG,"Entered for loop");
-//                    tvStatus.append(item.getItemName()+"\n");
-                    Log.i(TAG,item.getItemName());
+            Log.i(TAG,"Where Clause: "+whereClause);
+            DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+            queryBuilder.setWhereClause( whereClause ).setRelationsDepth( 1 );
+            queryBuilder.setRelated(COLUMN_NAME_ITEM_LOCATION);
+            Backendless.Data.of( Item.class ).find(queryBuilder, new AsyncCallback<List<Item>>() {
+                @Override
+                public void handleResponse(List<Item> response) {
+                    //TODO debug message
+                    tvStatus.setText("Started searching");
+                    foundItems.clear();
+                    if(response.size() !=0){
+                        for( Item item : response)
+                        {   foundItems.add(item);
+                            Log.i(TAG,item.getItemName());
+                        }
+                    }else {
+                        Log.d(TAG,"Search hasn't returned any results");
+                        Toast.makeText(getApplicationContext(),"Search hasn't returned any results",Toast.LENGTH_SHORT).show();
+                    }
+                    mAdapter.notifyDataSetChanged();
                 }
-                mAdapter.notifyDataSetChanged();
-            }
 
-            @Override
-            public void handleFault(BackendlessFault fault) {
-                Log.e(TAG,"Error: "+fault.getCode()+fault.getMessage());
-            }
-        });
-
-//        String format = "%s lives at %f, %f tagged as '%s'";
-
-
-
+                @Override
+                public void handleFault(BackendlessFault fault) {
+                    Log.e(TAG,"Error: "+fault.getCode()+fault.getMessage());
+                }
+            });
+        }else {
+            Log.e(TAG,"Please choose a location");
+            Toast.makeText(this,"Please choose a location",Toast.LENGTH_SHORT).show();
+        }
     }
+
+    //This is when a user selects a place from the auto complete suggestions
+    private AdapterView.OnItemClickListener itemAutoCompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            final PlaceArrayAdapter.PlaceAutocomplete item = mPlaceArrayAdapter.getItem(position);
+            final String placeId = String.valueOf(item.placeId);
+            Log.i(TAG, "Selected: " + item.description);
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(mGoogleApiClient, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            Log.i(TAG, "Fetching details for ID: " + item.placeId);
+        }
+    };
+
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                Log.e(TAG, "Place query did not complete. Error: " +
+                        places.getStatus().toString());
+                return;
+            }
+            // Selecting the first object buffer.
+            final Place place = places.get(0);
+            CharSequence attributions = places.getAttributions();
+            selectedLocLatLng = place.getLatLng();
+        }
+    };
 
     private void getCurrentPlace() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -257,17 +306,24 @@ public class SearchItems extends AppCompatActivity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        mPlaceArrayAdapter.setGoogleApiClient(mGoogleApiClient);
+        Log.i(TAG, "Google Places API connected.");
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        mPlaceArrayAdapter.setGoogleApiClient(null);
+        Log.e(TAG, "Google Places API connection suspended.");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        Log.e(TAG, "Google Places API connection failed with error code: "
+                + connectionResult.getErrorCode());
+        Toast.makeText(this,
+                "Google Places API connection failed with error code:" +
+                        connectionResult.getErrorCode(),
+                Toast.LENGTH_LONG).show();
     }
 }
 
