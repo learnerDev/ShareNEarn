@@ -17,4 +17,12 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="My.EditText.Style" parent="@android:style/Widget.EditText">
+        <item name="android:background">@color/common_google_signin_btn_text_dark_pressed</item>
+        <item name="android:layout_height">@dimen/dp40</item>
+        <item name="android:layout_margin">@dimen/dp8</item>
+        <item name="android:paddingLeft">@dimen/dp4</item>
+        <item name="android:textCursorDrawable">@null</item>
+    </style>
+
 </resources>
