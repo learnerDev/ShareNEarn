@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -82,7 +83,7 @@ public class SearchItems extends AppCompatActivity implements
 
     private RecyclerView itemsRecycler;
     private ItemsListAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private LinearLayoutManager mLayoutManager;
 //    private ItemsListAdapter itemsListAdapter;
     private PlaceArrayAdapter mPlaceArrayAdapter;
 
@@ -112,6 +113,9 @@ public class SearchItems extends AppCompatActivity implements
         itemsRecycler.setLayoutManager(mLayoutManager);
         itemsRecycler.setItemAnimator(new DefaultItemAnimator());
         itemsRecycler.setAdapter(mAdapter);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(itemsRecycler.getContext(),
+                mLayoutManager.getOrientation());
+        itemsRecycler.addItemDecoration(dividerItemDecoration);
 
         //To get the necessary google api client for location auto complete and for likely places
         mGoogleApiClient = new GoogleApiClient.Builder(SearchItems.this)
