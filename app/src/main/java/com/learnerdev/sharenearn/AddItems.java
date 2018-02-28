@@ -58,7 +58,7 @@ public class AddItems extends AppCompatActivity implements
     private TextView tvStatus;//TODO this text view is only for debug purposes
     private GoogleApiClient mGoogleApiClient;
     PlaceDetectionClient mPlaceDetectionClient;
-
+    private Item Item;
 
     private PlaceArrayAdapter mPlaceArrayAdapter;
 //    Location mLastLocation;
@@ -130,8 +130,7 @@ public class AddItems extends AppCompatActivity implements
         }
 
         if (!tempItemName.isEmpty() && !tempItemDetails.isEmpty()) {
-
-            item[0] = new Item(tempItemName, tempItemDetails);
+            Item = new Item(tempItemName,tempItemDetails);
             //TODO this is metadata for adding a locaiton in backendless, it has hard coded string
             itemLocation.addMetadata("ItemName", tempItemName);
             Backendless.Geo.savePoint(itemLocation, new AsyncCallback<GeoPoint>() {
@@ -140,14 +139,14 @@ public class AddItems extends AppCompatActivity implements
                     Toast.makeText(getApplicationContext(), "Successfully inserted geo",
                             Toast.LENGTH_SHORT).show();
                     itemLocation = response;
-                    Backendless.Persistence.of(Item.class).save(item[0], new AsyncCallback<Item>() {
+                    Backendless.Persistence.of(Item.class).save(Item, new AsyncCallback<Item>() {
                         public void handleResponse(Item response) {
                             Toast.makeText(getApplicationContext(), "Successfully inserted",
                                     Toast.LENGTH_LONG).show();
-                            item[0] = response;
-                            ArrayList<GeoPoint> location = new ArrayList<GeoPoint>();
+                            Item = response;
+                            ArrayList<GeoPoint> location = new ArrayList<>();
                             location.add(itemLocation);
-                            Backendless.Persistence.of(Item.class).setRelation(item[0], COLUMN_NAME_ITEM_LOCATION+":GeoPoint:1", location, new AsyncCallback<Integer>() {
+                            Backendless.Persistence.of(Item.class).setRelation(Item, COLUMN_NAME_ITEM_LOCATION+":GeoPoint:1", location, new AsyncCallback<Integer>() {
                                 @Override
                                 public void handleResponse(Integer response) {
                                     Toast.makeText(getApplicationContext(), "Successfully related",
