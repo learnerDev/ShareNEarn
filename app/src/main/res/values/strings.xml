@@ -11,5 +11,12 @@
     <string name="item_details">Item details</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
+    <string name="main_activity">Primary</string>
+    <string name="search_items">Search</string>
+    <string name="add_items">Add</string>
+    <string name="view_item">View</string>
+
+
+
 
 </resources>

@@ -28,8 +28,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddItems" />
-        <activity android:name=".SearchItems" />
+        <activity android:name=".AddItems"
+            android:label="@string/add_items"
+            />
+        <activity android:name=".SearchItems"
+
+            android:label="@string/search_items"
+            />
         <activity android:name=".ViewItem"></activity>
     </application>
 
