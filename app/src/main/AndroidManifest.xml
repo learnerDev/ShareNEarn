@@ -32,10 +32,14 @@
             android:label="@string/add_items"
             />
         <activity android:name=".SearchItems"
-
+            android:launchMode="singleTop"
             android:label="@string/search_items"
             />
-        <activity android:name=".ViewItem"></activity>
+        <activity android:name=".ViewItem"
+            android:parentActivityName=".SearchItems"
+            android:theme="@style/AppTheme"
+            >
+        </activity>
     </application>
 
 </manifest>
